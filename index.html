@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>Todo List</title>
+  <title>TodoMVC</title>
   <script src="https://unpkg.com/vue@2"></script>
   <link rel="stylesheet" type="text/css" href="https://unpkg.com/todomvc-app-css@2.2.0/index.css" />
 </head>
@@ -10,7 +10,7 @@
 <body>
   <div id="app" class="todoapp">
     <header class="header">
-      <h1>Todo List</h1>
+      <h1>todos</h1>
       <input class="new-todo" autofocus autocomplete="false" placeholder="What needs to be done?" v-model="newTodo"
         @keyup.enter="addTodo" />
     </header>
@@ -21,7 +21,7 @@
         <label for="toggle-all"></label>
 
         <li class="todo" v-for="todo in filteredTodos" :key="todo.id"
-        :class="{editing: todo == editedTodo, completed: todo.completed}">
+          :class="{editing: todo == editedTodo, completed: todo.completed}">
           <div class="view">
             <input class="toggle" type="checkbox" v-model="todo.completed" />
             <label @dblclick="editTodo(todo)"> {{ todo.text }} </label>
@@ -55,6 +55,7 @@
 
   <div class="info">
     <p>Written by <a href="http://github.com/mancuoj">Mancuoj</a></p>
+    <p><a href="https://github.com/mancuoj/vue2-todo-mvc-tutorial">Tutorial from scratch</a></p>
   </div>
 
   <script>

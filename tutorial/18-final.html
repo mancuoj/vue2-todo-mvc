@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>TodoMVC</title>
+  <script src="https://unpkg.com/vue@2"></script>
+  <link rel="stylesheet" type="text/css" href="https://unpkg.com/todomvc-app-css@2.2.0/index.css" />
+</head>
+
+<body>
+  <div id="app" class="todoapp">
+    <header class="header">
+      <h1>todos</h1>
+      <input class="new-todo" autofocus autocomplete="false" placeholder="What needs to be done?" v-model="newTodo"
+        @keyup.enter="addTodo" />
+    </header>
+
+    <main class="main">
+      <ul class="todo-list" v-show="todos.length">
+        <input id="toggle-all" class="toggle-all" type="checkbox" v-model="allDone" />
+        <label for="toggle-all"></label>
+
+        <li class="todo" v-for="todo in filteredTodos" :key="todo.id"
+          :class="{editing: todo == editedTodo, completed: todo.completed}">
+          <div class="view">
+            <input class="toggle" type="checkbox" v-model="todo.completed" />
+            <label @dblclick="editTodo(todo)"> {{ todo.text }} </label>
+            <button class="destroy" @click="removeTodo(todo)"></button>
+          </div>
+
+          <input class="edit" v-model="todo.text" v-todo-focus="todo == editedTodo" @keyup.esc="cancelEditTodo(todo)"
+            @keyup.enter="doneEditTodo(todo)" @blur="doneEditTodo(todo)" />
+        </li>
+      </ul>
+    </main>
+
+    <footer class="footer" v-show="todos.length">
+      <span class="todo-count" v-show="remaining">
+        <strong> {{ remaining }} </strong>
+        {{ remaining | pluralize }}
+        left
+      </span>
+
+      <ul class="filters">
+        <li><a href="#/all" :class="{ selected: visibility == 'all' }">All</a></li>
+        <li><a href="#/active" :class="{ selected: visibility == 'active' }">Active</a></li>
+        <li><a href="#/completed" :class="{ selected: visibility == 'completed' }">Completed</a></li>
+      </ul>
+
+      <button class="clear-completed" v-show="todos.length > remaining" @click="removeAllCompleted">
+        Clear completed
+      </button>
+    </footer>
+  </div>
+
+  <div class="info">
+    <p>Written by <a href="http://github.com/mancuoj">Mancuoj</a></p>
+    <p><a href="https://github.com/mancuoj/vue2-todo-mvc-tutorial">Tutorial from scratch</a></p>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'mancuoj'
+    const todoStorage = {
+      fetch: function () {
+        let todos = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+        todos.forEach((todo, index) => (todo.id = index))
+        todoStorage.uid = todos.length
+        return todos
+      },
+
+      save: function (todos) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))
+      }
+    }
+
+    const todosFilters = {
+      all: function (todos) {
+        return todos
+      },
+
+      active: function (todos) {
+        return todos.filter(todo => !todo.completed)
+      },
+
+      completed: function (todos) {
+        return todos.filter(todo => todo.completed)
+      },
+    }
+
+    const app = new Vue({
+      el: '#app',
+      data: {
+        todos: todoStorage.fetch(),
+        newTodo: '',
+        editedTodo: null,
+        visibility: 'all',
+      },
+
+      watch: {
+        todos: {
+          handler: function (todos) {
+            todoStorage.save(todos)
+          },
+          deep: true
+        }
+      },
+
+      computed: {
+        filteredTodos: function () {
+          return todosFilters[this.visibility](this.todos)
+        },
+
+        remaining: function () {
+          return todosFilters.active(this.todos).length
+        },
+
+        allDone: {
+          get: function () {
+            return this.remaining === 0
+          },
+
+          set: function (value) {
+            this.todos.forEach(todo => (todo.completed = value))
+          },
+        },
+      },
+
+      methods: {
+        addTodo: function () {
+          if (!this.newTodo) {
+            return
+          }
+
+          this.todos.push({
+            id: todoStorage.uid++,
+            text: this.newTodo.trim(),
+            completed: false
+          })
+          this.newTodo = ''
+        },
+
+        removeTodo: function (todo) {
+          this.todos.splice(this.todos.indexOf(todo), 1)
+        },
+
+        editTodo: function (todo) {
+          this.todoTextCache = todo.text
+          this.editedTodo = todo
+        },
+
+        cancelEditTodo: function (todo) {
+          todo.text = this.todoTextCache
+          this.editedTodo = null
+        },
+
+        doneEditTodo: function (todo) {
+          if (!this.editedTodo) {
+            return
+          }
+
+          this.editedTodo = null
+          todo.text = todo.text.trim()
+          if (!todo.text) {
+            this.removeTodo(todo)
+          }
+        },
+
+        removeAllCompleted: function () {
+          this.todos = todosFilters.active(this.todos)
+        },
+      },
+
+      directives: {
+        'todo-focus': function (el, binding) {
+          if (binding.value) {
+            el.focus()
+          }
+        },
+      },
+
+      filters: {
+        pluralize: function (n) {
+          return n === 1 ? 'item' : 'items'
+        },
+      }
+    })
+
+    function onHashChange() {
+      let visibility = window.location.hash.replace(/#\/?/, '')
+      if (todosFilters[visibility]) {
+        app.visibility = visibility
+      } else {
+        window.location.hash = ''
+        app.visibility = 'all'
+      }
+    }
+
+    window.addEventListener('hashchange', onHashChange)
+    onHashChange()
+  </script>
+</body>
+
+</html>

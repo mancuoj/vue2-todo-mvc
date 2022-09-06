@@ -1,6 +1,6 @@
-# Vue2 TODO MVC Tutorial
+# Vue2 TodoMVC Tutorial
 
-通过搭建一个标准的 TODO MVC 来快速上手 Vue2 ⚡
+通过搭建一个标准的 TodoMVC 来快速上手 Vue2 ⚡
 
 Build a todo app from scratch with Vue2, crash course!
 
