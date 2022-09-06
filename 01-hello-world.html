@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script src="https://unpkg.com/vue@2"></script>
+  <title>Mancuoj App</title>
+</head>
+
+<body>
+  <div id="app">
+    Hello {{ message }}
+  </div>
+
+  <script>
+    const app = new Vue({
+      el: '#app',
+      data: {
+        message: 'World!'
+      }
+    })
+
+    // app.message = 'Vue'
+  </script>
+</body>
+
+</html>

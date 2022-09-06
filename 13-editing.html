@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script src="https://unpkg.com/vue@2"></script>
+  <title>Mancuoj App</title>
+  <style>
+    li.completed {
+      text-decoration: line-through;
+    }
+
+    li .edit {
+      display: none;
+    }
+
+    li.editing .view {
+      display: none;
+    }
+
+    li.editing .edit {
+      display: block;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <h1> {{ message }} </h1>
+
+    <input type="checkbox" v-model="allDone">
+    <input v-model="newTodo" @keyup.enter="addTodo">
+
+    <ul>
+      <li v-for="todo in filteredTodos" :key="todo.id"
+        :class="{completed: todo.completed, editing: todo == editedTodo}">
+        <div class="view">
+          <input type="checkbox" v-model="todo.completed">
+          <label @dblclick="editTodo(todo)">
+            {{todo.text }}
+          </label>
+          <button @click="removeTodo(todo)">Remove</button>
+        </div>
+
+        <input class="edit" v-model="todo.text">
+      </li>
+    </ul>
+
+    <button v-for="tab in tabs" :key="tab" @click="currentTab = tab">
+      {{ tab }}
+    </button>
+  </div>
+
+  <script>
+    const filters = {
+      all: function (todos) {
+        return todos
+      },
+
+      active: function (todos) {
+        return todos.filter(todo => !todo.completed)
+      },
+
+      completed: function (todos) {
+        return todos.filter(todo => todo.completed)
+      }
+    }
+
+    const app = new Vue({
+      el: '#app',
+      data: {
+        message: "TODO MVC",
+        todos: [
+          { id: 1, text: 'Learn JavaScript', completed: false },
+          { id: 2, text: 'Learn Vue', completed: false },
+          { id: 3, text: 'Build a todo app', completed: true }
+        ],
+        newTodo: '',
+        nextId: 4,
+        tabs: ['all', 'active', 'completed'],
+        currentTab: 'all',
+        editedTodo: null
+      },
+
+      computed: {
+        filteredTodos: function () {
+          return filters[this.currentTab](this.todos)
+        },
+
+        allDone: {
+          get: function () {
+            return filters['active'](this.todos).length === 0
+          },
+
+          set: function (value) {
+            this.todos.forEach(todo => (todo.completed = value))
+          }
+        }
+      },
+
+      methods: {
+        addTodo: function () {
+          if (!this.newTodo) {
+            return
+          }
+
+          this.todos.push({
+            id: this.nextId++,
+            text: this.newTodo.trim(),
+            completed: false
+          })
+          this.newTodo = ''
+        },
+
+        editTodo: function (todo) {
+          this.editedTodo = todo
+        },
+
+        removeTodo: function (todo) {
+          this.todos.splice(this.todos.indexOf(todo), 1)
+        }
+      }
+    })
+  </script>
+</body>
+
+</html>

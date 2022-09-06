@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script src="https://unpkg.com/vue@2"></script>
+  <title>Mancuoj App</title>
+</head>
+
+<body>
+  <div id="app">
+    <h1> {{ message }} </h1>
+
+    <input v-model="newTodo">
+    {{ newTodo }}
+
+    <ul>
+      <li v-for="todo in todos" :key="todo.id">
+        {{ todo.text }}
+        <button @click="removeTodo(todo)">Remove</button>
+      </li>
+    </ul>
+  </div>
+
+  <script>
+    const app = new Vue({
+      el: '#app',
+      data: {
+        message: "TODO MVC",
+        todos: [
+          { id: 1, text: 'Learn JavaScript', completed: false },
+          { id: 2, text: 'Learn Vue', completed: false },
+          { id: 3, text: 'Build a todo app', completed: true }
+        ],
+        newTodo: 'Sleeeeeeeeeeeeeeep'
+      },
+      methods: {
+        removeTodo: function (todo) {
+          this.todos.splice(this.todos.indexOf(todo), 1)
+        }
+      }
+    })
+  </script>
+</body>
+
+</html>

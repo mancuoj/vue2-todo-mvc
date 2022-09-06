@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script src="https://unpkg.com/vue@2"></script>
+  <title>Mancuoj App</title>
+  <style>
+    li.completed {
+      text-decoration: line-through;
+    }
+
+    li .edit {
+      display: none;
+    }
+
+    li.editing .view {
+      display: none;
+    }
+
+    li.editing .edit {
+      display: block;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <h1> {{ message }} </h1>
+
+    <input type="checkbox" v-model="allDone">
+    <input v-model="newTodo" @keyup.enter="addTodo">
+
+    <ul>
+      <li v-for="todo in filteredTodos" :key="todo.id"
+        :class="{completed: todo.completed, editing: todo == editedTodo}">
+        <div class="view">
+          <input type="checkbox" v-model="todo.completed">
+          <label @dblclick="editTodo(todo)">
+            {{todo.text }}
+          </label>
+          <button @click="removeTodo(todo)">Remove</button>
+        </div>
+
+        <input class="edit" v-model="todo.text" v-todo-focus="todo == editedTodo" @keyup.esc="cancelEditTodo(todo)"
+          @keyup.enter="doneEditTodo(todo)" @blur="doneEditTodo(todo)">
+      </li>
+    </ul>
+
+    <button v-for="tab in tabs" :key="tab" @click="currentTab = tab">
+      {{ tab }}
+    </button>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'mancuoj'
+    const todoStorage = {
+      fetch: function () {
+        let todos = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+        todos.forEach((todo, index) => (todo.id = index))
+        todoStorage.uid = todos.length
+        return todos
+      },
+
+      save: function (todos) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))
+      }
+    }
+
+    const filters = {
+      all: function (todos) {
+        return todos
+      },
+
+      active: function (todos) {
+        return todos.filter(todo => !todo.completed)
+      },
+
+      completed: function (todos) {
+        return todos.filter(todo => todo.completed)
+      }
+    }
+
+    const app = new Vue({
+      el: '#app',
+      data: {
+        message: "TODO MVC",
+        todos: todoStorage.fetch(),
+        newTodo: '',
+        tabs: ['all', 'active', 'completed'],
+        currentTab: 'all',
+        editedTodo: null
+      },
+
+      watch: {
+        todos: {
+          handler: function (todos) {
+            todoStorage.save(todos)
+          },
+          deep: true
+        }
+      },
+
+      computed: {
+        filteredTodos: function () {
+          return filters[this.currentTab](this.todos)
+        },
+
+        allDone: {
+          get: function () {
+            return filters['active'](this.todos).length === 0
+          },
+
+          set: function (value) {
+            this.todos.forEach(todo => (todo.completed = value))
+          }
+        }
+      },
+
+      methods: {
+        addTodo: function () {
+          if (!this.newTodo) {
+            return
+          }
+
+          this.todos.push({
+            id: todoStorage.uid++,
+            text: this.newTodo.trim(),
+            completed: false
+          })
+          this.newTodo = ''
+        },
+
+        editTodo: function (todo) {
+          this.todoTextCache = todo.text
+          this.editedTodo = todo
+        },
+
+        cancelEditTodo: function (todo) {
+          todo.text = this.todoTextCache
+          this.editedTodo = null
+        },
+
+        doneEditTodo: function (todo, el) {
+          if (!this.editedTodo) {
+            return
+          }
+
+          this.editedTodo = null
+          todo.text = todo.text.trim()
+          if (!todo.text) {
+            this.removeTodo(todo)
+          }
+        },
+
+        removeTodo: function (todo) {
+          this.todos.splice(this.todos.indexOf(todo), 1)
+        }
+      },
+
+      directives: {
+        'todo-focus': function (el, binding) {
+          if (binding.value) {
+            el.focus()
+          }
+        }
+      }
+    })
+  </script>
+</body>
+
+</html>
