@@ -1,7 +1,7 @@
 
-18个文件快速上手 Vue2，一步步地搭建出一个完整的 TodoMVC⚡
+[18个文件快速上手 Vue2，一步步地搭建出一个完整的 TodoMVC](https://github.com/mancuoj/vue2-todo-mvc-tutorial/issues/2)
 
-Build a todo app from scratch with Vue2, crash course! 
+Build a todo app from scratch with Vue2, crash course⚡
 
 - [Vue.js](https://v2.vuejs.org/)
 - [TodoMVC](https://todomvc.com/)
